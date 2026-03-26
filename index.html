@@ -102,19 +102,33 @@
           </div>
 
           <div class="section__right reveal">
-            <div class="gallery card--glass">
-              <div class="gallery__title">Aesthetic Moments</div>
-              <div class="gallery__grid" aria-label="Romantic aesthetic gallery">
-                <div class="tile tile--1"><span>Rose Glow</span></div>
-                <div class="tile tile--2"><span>Lavender Sky</span></div>
-                <div class="tile tile--3"><span>Soft Hearts</span></div>
-                <div class="tile tile--4"><span>Moon Kiss</span></div>
-                <div class="tile tile--5"><span>Blush Dream</span></div>
-                <div class="tile tile--6"><span>Golden Haze</span></div>
+            <div class="playlist card--glass" aria-label="Song playlist">
+              <div class="playlist__title">Song Playlist</div>
+              <div class="playlist__grid">
+                <button class="track" type="button" data-track="Barbaad.mp3">
+                  <div class="track__cover" style="--cover:url('./Barbaad.jpg')"></div>
+                  <div class="track__meta">
+                    <div class="track__name">Barbaad</div>
+                    <div class="track__file">Barbaad.mp3</div>
+                  </div>
+                </button>
+                <button class="track" type="button" data-track="arzu.mp3">
+                  <div class="track__cover" style="--cover:url('./arzu.jpg')"></div>
+                  <div class="track__meta">
+                    <div class="track__name">Arzu</div>
+                    <div class="track__file">arzu.mp3</div>
+                  </div>
+                </button>
+                <button class="track" type="button" data-track="your.mp3">
+                  <div class="track__cover" style="--cover:url('./your.jpg')"></div>
+                  <div class="track__meta">
+                    <div class="track__name">Your</div>
+                    <div class="track__file">your.mp3</div>
+                  </div>
+                </button>
               </div>
-              <div class="gallery__note">
-                Replace these tiles with your favorite photos anytime.
-              </div>
+              <div id="nowPlaying" class="playlist__now">Now playing: Barbaad.mp3</div>
+              <div class="playlist__note">Tap any cover to play that song.</div>
             </div>
           </div>
         </div>

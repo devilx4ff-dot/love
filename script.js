@@ -226,18 +226,20 @@ function setupPlaylist(music, toast) {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  if (list.length < 2) return;
+  if (list.length < 1) return;
 
   let index = 0;
+  const listeners = new Set();
 
   const toUrl = (name) => `./${encodeURIComponent(name)}`;
 
   const setIndex = (i) => {
     index = ((i % list.length) + list.length) % list.length;
     music.setSource(toUrl(list[index]));
+    for (const cb of listeners) cb({ index, name: list[index], list: [...list] });
   };
 
-  if (!audio.src) setIndex(0);
+  setIndex(0);
 
   audio.addEventListener("ended", async () => {
     setIndex(index + 1);
@@ -249,6 +251,60 @@ function setupPlaylist(music, toast) {
     setIndex(index + 1);
     if (music.isOn && !music.hasError) await music.play({ toast });
   });
+
+  const setTrackByName = (name) => {
+    const idx = list.findIndex((x) => x.toLowerCase() === String(name).toLowerCase());
+    if (idx === -1) return false;
+    setIndex(idx);
+    return true;
+  };
+
+  const onChange = (cb) => {
+    if (typeof cb !== "function") return () => {};
+    listeners.add(cb);
+    cb({ index, name: list[index], list: [...list] });
+    return () => listeners.delete(cb);
+  };
+
+  return {
+    list: [...list],
+    get index() {
+      return index;
+    },
+    get name() {
+      return list[index];
+    },
+    setTrackByName,
+    onChange,
+  };
+}
+
+function setupPlaylistUI(playlist, music, toast) {
+  if (!playlist) return;
+  const now = document.getElementById("nowPlaying");
+  const tracks = Array.from(document.querySelectorAll("[data-track]"));
+
+  const setActive = (activeName) => {
+    for (const el of tracks) {
+      if (!(el instanceof HTMLElement)) continue;
+      const name = el.dataset.track || "";
+      el.classList.toggle("is-active", name === activeName);
+    }
+    if (now instanceof HTMLElement) now.textContent = `Now playing: ${activeName}`;
+  };
+
+  playlist.onChange(({ name }) => setActive(name));
+
+  for (const el of tracks) {
+    if (!(el instanceof HTMLElement)) continue;
+    el.addEventListener("click", async () => {
+      const name = el.dataset.track || "";
+      if (!name) return;
+      playlist.setTrackByName(name);
+      toast?.show(`Now playing: ${name}`, 1800);
+      if (!music?.hasError) await music.play({ toast });
+    });
+  }
 }
 
 function setupTypingLetter() {
@@ -457,7 +513,8 @@ function init() {
   setupModal();
   const music = setupMusic();
   setupSurpriseMusicBridge(music);
-  setupPlaylist(music, toast);
+  const playlist = setupPlaylist(music, toast);
+  setupPlaylistUI(playlist, music, toast);
 
   music.tryAuto({ toast });
 
