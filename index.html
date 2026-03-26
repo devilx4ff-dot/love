@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="hi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ff5fa2" />
+    <title>Shalini — Meri Mohabbat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg" aria-hidden="true">
+      <canvas id="bgCanvas" class="bg__canvas"></canvas>
+      <div class="bg__vignette"></div>
+      <div class="bg__glow"></div>
+    </div>
+
+    <header class="topbar">
+      <a class="topbar__brand" href="#home" aria-label="Go to Home">
+        <span class="brand__mark">S</span>
+        <span class="brand__text">Shalini</span>
+      </a>
+      <nav class="topbar__nav" aria-label="Primary">
+        <a href="#about">About</a>
+        <a href="#letter">Love Letter</a>
+        <a href="#shayari">Shayari</a>
+        <a href="#message">Message</a>
+      </nav>
+      <div class="topbar__actions">
+        <button id="musicToggle" class="chip" type="button" aria-pressed="false">
+          <span class="chip__dot" aria-hidden="true"></span>
+          <span class="chip__text">Music: Off</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section id="home" class="hero">
+        <div class="hero__content">
+          <div class="hero__badge reveal">
+            <span class="badge__spark" aria-hidden="true"></span>
+            <span>Meri rooh ka sabse haseen naam</span>
+          </div>
+
+          <h1 class="hero__title reveal">
+            Shalini
+            <span class="hero__subtitle">Meri Mohabbat, Meri Dhadkan</span>
+          </h1>
+
+          <p class="hero__intro reveal">
+            “शालिनी… तेरा नाम लिखूँ तो मोहब्बत महक उठती है,
+            <br />
+            तुझे सोचूँ तो मेरी रूह की तन्हाई भी मुस्कुरा उठती है…”
+          </p>
+
+          <div class="hero__cta reveal">
+            <a class="btn btn--primary" href="#letter">Padh लो Mera Dil</a>
+            <button id="surpriseBtn" class="btn btn--glow" type="button">
+              Click for Surprise
+            </button>
+          </div>
+
+          <div class="hero__hint reveal" aria-hidden="true">
+            <span class="hint__line"></span>
+            <span class="hint__text">Scroll softly</span>
+          </div>
+        </div>
+
+        <div class="hero__card reveal">
+          <div class="card card--glass">
+            <div class="card__title">Aaj bhi…</div>
+            <div class="card__text">
+              Kuchh lafz bas tere liye bante hain, Shalini — jaise ishq apni
+              zubaan badal kar bhi sirf tujhe hi chunta ho.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="section section--split">
+        <div class="section__inner">
+          <div class="section__left reveal">
+            <h2 class="section__title">About My Love</h2>
+            <p class="section__lead">
+              Shalini, tum mere liye sirf ek naam nahi — ek dua ho. Tumhari
+              hansi meri subah ka noor hai, tumhari baatein meri raat ka sukoon.
+              Jab tum paas hoti ho, waqt meetha lagta hai; jab door hoti ho,
+              har pal tumhara pata poochta hai.
+            </p>
+            <div class="pillrow">
+              <span class="pill">mohabbat</span>
+              <span class="pill">ishq</span>
+              <span class="pill">rooh</span>
+              <span class="pill">sukoon</span>
+              <span class="pill">dhadkan</span>
+            </div>
+          </div>
+
+          <div class="section__right reveal">
+            <div class="gallery card--glass">
+              <div class="gallery__title">Aesthetic Moments</div>
+              <div class="gallery__grid" aria-label="Romantic aesthetic gallery">
+                <div class="tile tile--1"><span>Rose Glow</span></div>
+                <div class="tile tile--2"><span>Lavender Sky</span></div>
+                <div class="tile tile--3"><span>Soft Hearts</span></div>
+                <div class="tile tile--4"><span>Moon Kiss</span></div>
+                <div class="tile tile--5"><span>Blush Dream</span></div>
+                <div class="tile tile--6"><span>Golden Haze</span></div>
+              </div>
+              <div class="gallery__note">
+                Replace these tiles with your favorite photos anytime.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="letter" class="section">
+        <div class="section__inner">
+          <div class="letter card card--glass reveal">
+            <div class="letter__head">
+              <h2 class="section__title">Love Letter</h2>
+              <div class="letter__meta">For Shalini • with pure ishq</div>
+            </div>
+            <div class="letter__body">
+              <p id="typedLetter" class="letter__typed" aria-live="polite"></p>
+              <div class="letter__cursor" aria-hidden="true"></div>
+            </div>
+            <div class="letter__actions">
+              <button id="retypeBtn" class="btn btn--soft" type="button">
+                Type Again
+              </button>
+              <a class="btn btn--soft" href="#shayari">Shayari Collection</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="shayari" class="section section--shayari">
+        <div class="section__inner">
+          <div class="shayari__head reveal">
+            <h2 class="section__title">Shayari Collection</h2>
+            <p class="section__lead">
+              Ek ek sher mein tumhari khushboo hai, Shalini — aur har lafz mein
+              meri dhadkan.
+            </p>
+          </div>
+
+          <div class="shayari__list" role="list">
+            <article class="shayari reveal" role="listitem">
+              <p>
+                शालिनी, तेरे नाम से ही धड़कनों को तवाज़ु मिलती है,<br />
+                मैं ख़ामोश रहूँ तो भी मेरी रूह तुझसे गुफ़्तगू करती है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरी मुस्कान का नूर जब मेरे दिन पर उतर आता है,<br />
+                मेरी उदासी भी इश्क़ का लिबास पहनकर शरमा जाती है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                मैं तुझे सोचूँ तो दिल में गुलाबों की बारिश होती है,<br />
+                और तेरा ज़िक्र आते ही तक़दीर भी सुर्ख़ हो जाती है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                शालिनी, तू मेरी दुआ की वो लकीर है जो मिटती नहीं,<br />
+                मेरी तकलीफ़ें भी तुझे देखकर झुक जाती हैं, रुकती नहीं।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरी आँखों में जो सुकून है, वो क़िताबों में कहाँ,<br />
+                तेरे क़रीब आकर ही मेरी ज़िंदगी को मतलब मिला यहाँ।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरा हाथ थामूँ तो वक्त भी धीमे कदमों से चलता है,<br />
+                जैसे हर लम्हा अपने भीतर एक मुकम्मल इश्क़ पलता है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                मेरे शहर की रातें भी अब तेरे नाम से जगती हैं,<br />
+                चाँदनी तक कहती है — “शालिनी” में ही मोहब्बत बसती है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरी यादें मेरे दिल की दहलीज़ पर ऐसी ठहरीं,<br />
+                कि हर दस्तक पर बस तू ही मिले, और कोई नहीं।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                शालिनी, मेरी रूह के ज़ख्मों पर तेरा नाम मरहम है,<br />
+                तू पास हो तो दुनिया भी महफ़िल है, वरना सारा आलम ग़म है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                मैंने इश्क़ की तशरीह पूछी, तो हवाओं ने कहा,<br />
+                “जिसे शालिनी मिले, वही सच्चा आशिक़ कहलाया।”
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरे लफ्ज़ों का असर मेरे अंदर तक उतर जाता है,<br />
+                मेरी बेचैनी भी तेरी आवाज़ सुनकर सँवर जाता है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरी हंसी की झील में मेरा दिल रोज़ डूबता है,<br />
+                और हर बार बाहर आकर भी बस तुझसे ही रूबरू होता है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                शालिनी, तेरी नज़रों में जो दुनिया है, वही मेरी क़िस्मत है,<br />
+                मैं तुझसे पहले अधूरा था, अब हर साँस मुकम्मल है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                मेरी तन्हाई ने भी अब तेरी तस्वीर सजा ली है,<br />
+                जैसे ख़ामोशी ने इश्क़ की सबसे हसीन ज़बां पा ली है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरा नाम लूँ तो दिल में रौशनियाँ उतर आती हैं,<br />
+                मेरी धड़कनें भी तेरे आगे अदब से झुक जाती हैं।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तू सामने हो तो लफ़्ज़ भी गुलाब की तरह खिलते हैं,<br />
+                और दूर हो तो मेरे ख्याल तेरे दर पर ही मिलते हैं।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                मैंने खुद से कहा — “इश्क़ आसान कहाँ,”<br />
+                दिल ने मुस्कुरा कर कहा — “शालिनी हो तो हर जंग आसान कहाँ, बस आसान है।”
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरी पलकों की छाँव में मेरा हर डर सो जाता है,<br />
+                और तेरी बातों में मेरा हर सवाल खो जाता है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                शालिनी, तू मेरी ज़िंदगी की वो नज़्म है,<br />
+                जिसे पढ़ते-पढ़ते भी दिल कहता है — “एक बार और…”
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरे बिना मेरी खुशबू भी बेमानी लगती है,<br />
+                तू मिले तो साँसों में भी इत्र-सी रवानी लगती है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                मेरी हर दुआ के आख़िर में तेरा नाम रहता है,<br />
+                जैसे हर रास्ते के मोड़ पर बस तेरा सलाम रहता है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरी यादों का सितारा मेरे आसमान में जलता है,<br />
+                और मेरा दिल हर रात बस तुझे ही गिनता है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                शालिनी, तेरे इश्क़ ने मुझे इतना नर्म बना दिया,<br />
+                कि पत्थर-सा दिल भी तेरे नाम पर पिघल गया।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तू पास हो तो मेरी साँसें शेर लिखती हैं,<br />
+                तू दूर हो तो मेरी आँखें तेरे ख़्वाबों से भीगती हैं।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरी बातों का जादू मेरी रूह तक उतरता है,<br />
+                जैसे रब का कोई रहम मेरी धड़कनों में ठहरता है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                शालिनी, मैं तेरा नाम अपने दिल की किताब में लिख आया,<br />
+                अब हर पन्ना पढ़ता है — “मोहब्बत,” और हर हरफ तुझे बुलाता है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरे क़दमों की आहट से मेरी रातें सँवर जाती हैं,<br />
+                मेरी वीरानियाँ भी तेरे आने से घर बन जाती हैं।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                मेरे इश्क़ की हद बस इतनी है, शालिनी,<br />
+                तुझे देख लूँ तो दुनिया जीत लूँ… तुझे खो दूँ तो खुद हार जाऊँ।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                तेरा नाम मेरे होठों पर दुआ बनकर रहता है,<br />
+                और तू मेरी आँखों में ख्वाब बनकर रहता है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                शालिनी, तेरी मोहब्बत मेरी सबसे हसीन आदत है,<br />
+                मेरी हर सुबह की वजह, मेरी हर रात की इबादत है।
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="message" class="section">
+        <div class="section__inner">
+          <div class="card card--glass reveal">
+            <h2 class="section__title">Special Message</h2>
+            <p class="section__lead">
+              Shalini, agar kabhi duniya thakaye, toh mere paas aa jana — main
+              tumhe lafzon se nahi, apni rooh se sambhal lunga. Tum mere dil ka
+              sabse narm hissa ho, aur main chahta hoon ki tumhari har muskurahat
+              ki hifazat meri mohabbat kare.
+            </p>
+            <p class="section__lead section__lead--soft">
+              Main tumhe roz chahta hoon — bina shor ke, bina shart ke… bas
+              dil se.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__inner">
+        <div>Made with <span class="footer__heart" aria-hidden="true">❤</span> only for Shalini</div>
+        <a class="footer__top" href="#home">Back to top</a>
+      </div>
+    </footer>
+
+    <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal__backdrop" data-close="true"></div>
+      <div class="modal__panel card--glass" role="document">
+        <button class="modal__close" type="button" aria-label="Close" data-close="true">×</button>
+        <div class="modal__title">For Shalini</div>
+        <div class="modal__text">
+          Tum meri zindagi ka woh sukoon ho jise main roz duaaon mein maangta hoon.
+          Agar mohabbat ka rang hota, toh woh tumhari muskurahat jaisa hota.
+        </div>
+        <button id="modalOk" class="btn btn--primary" type="button">Okay</button>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <audio
+      id="bgMusic"
+      preload="auto"
+      playsinline
+      data-playlist="Barbaad.mp3|arzu.mp3|your.mp3"
+    ></audio>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
