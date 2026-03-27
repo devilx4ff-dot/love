@@ -143,6 +143,7 @@ function setupMusic() {
 
   let isOn = false;
   let hasError = false;
+  let toastRef = null;
   const storedVol = Number(window.localStorage?.getItem(STORAGE.volume));
   if (!Number.isNaN(storedVol)) audio.volume = clamp(storedVol, 0, 1);
   else audio.volume = 0.6;
@@ -166,16 +167,22 @@ function setupMusic() {
   const play = async (opts = {}) => {
     try {
       if (hasError) return false;
+      toastRef = opts?.toast ?? toastRef;
       if (opts?.toast) opts.toast.show("Starting music…", 1400);
       audio.muted = false;
       await audio.play();
       isOn = true;
       render();
       return true;
-    } catch {
+    } catch (err) {
       isOn = false;
       render();
-      if (opts?.toast) opts.toast.show("Music blocked — tap the Music button once.", 3200);
+      const name = err?.name || "";
+      if (opts?.toast) {
+        if (name === "NotAllowedError") opts.toast.show("Tap Play/Music once to start.", 3200);
+        else if (name === "NotSupportedError") opts.toast.show("Song format not supported.", 3200);
+        else opts.toast.show("Music could not start. Tap once and try again.", 3200);
+      }
       return false;
     }
   };
@@ -189,6 +196,7 @@ function setupMusic() {
   const tryAuto = async (opts = {}) => {
     try {
       if (hasError) return false;
+      toastRef = opts?.toast ?? toastRef;
       audio.muted = true;
       await audio.play();
       window.setTimeout(() => {
@@ -197,11 +205,15 @@ function setupMusic() {
       isOn = true;
       render();
       return true;
-    } catch {
+    } catch (err) {
       audio.muted = false;
       isOn = false;
       render();
-      if (opts?.toast) opts.toast.show("Tap anywhere to enable music.", 3200);
+      if (opts?.toast) {
+        const name = err?.name || "";
+        if (name === "NotAllowedError") opts.toast.show("Tap Play/Music once to start.", 3200);
+        else opts.toast.show("Tap once to enable music.", 3200);
+      }
       return false;
     }
   };
@@ -215,6 +227,7 @@ function setupMusic() {
     hasError = true;
     isOn = false;
     render();
+    toastRef?.show?.("Song not loading. Check file name + refresh.", 3600);
   });
 
   audio.addEventListener("playing", () => {
@@ -264,14 +277,29 @@ function setupPlaylist(music, toast) {
   let shuffle = window.localStorage?.getItem(STORAGE.shuffle) === "1";
 
   const toUrl = (name) => `./${encodeURIComponent(name)}`;
+  const currentName = () => {
+    const src = audio.getAttribute("src") || audio.currentSrc || "";
+    const last = src.split("/").pop() || "";
+    try {
+      return decodeURIComponent(last.split("?")[0]);
+    } catch {
+      return last.split("?")[0];
+    }
+  };
 
   const setIndex = (i) => {
     index = ((i % list.length) + list.length) % list.length;
-    music.setSource(toUrl(list[index]));
+    const active = list[index];
+    const cur = currentName();
+    if (!cur || cur.toLowerCase() !== String(active).toLowerCase()) {
+      music.setSource(toUrl(active));
+    }
     for (const cb of listeners) cb({ index, name: list[index], list: [...list], shuffle });
   };
 
-  setIndex(0);
+  const cur = currentName();
+  const found = cur ? list.findIndex((x) => x.toLowerCase() === String(cur).toLowerCase()) : -1;
+  setIndex(found >= 0 ? found : 0);
 
   audio.addEventListener("ended", async () => {
     if (shuffle && list.length > 1) {
