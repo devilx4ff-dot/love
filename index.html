@@ -36,16 +36,8 @@
           <span class="chip__dot" aria-hidden="true"></span>
           <span class="chip__text">Music: Off</span>
         </button>
-        <button id="perfToggle" class="chip" type="button" aria-pressed="false">
-          <span class="chip__dot" aria-hidden="true"></span>
-          <span class="chip__text">Lite: Off</span>
-        </button>
       </div>
     </header>
-
-    <div class="scrollbar" aria-hidden="true">
-      <div id="scrollProgress" class="scrollbar__fill"></div>
-    </div>
 
     <main>
       <section id="home" class="hero">
@@ -141,13 +133,6 @@
                     <div class="track__file">Khat.mp3</div>
                   </div>
                 </button>
-                <button class="track" type="button" data-track="Kitab.mp3">
-                  <div class="track__cover" style="--cover:url('./kitab.jpg')"></div>
-                  <div class="track__meta">
-                    <div class="track__name">Kitab</div>
-                    <div class="track__file">Kitab.mp3</div>
-                  </div>
-                </button>
               </div>
               <div id="nowPlaying" class="playlist__now">Now playing: Barbaad.mp3</div>
               <div class="playlist__note">Tap any cover to play that song.</div>
@@ -158,16 +143,21 @@
 
       <section id="letter" class="section">
         <div class="section__inner">
-          <div class="envelopeWrap reveal" aria-label="Love envelope">
-            <div id="envelope" class="envelope envelope--white" aria-expanded="false">
-              <div class="envelope__back" aria-hidden="true"></div>
-              <div class="envelope__front" aria-hidden="true"></div>
-              <div class="envelope__flap" aria-hidden="true"></div>
-              <button id="envelopeSeal" class="envelope__seal" type="button" aria-label="Open love letter">
-                <span class="seal__heart" aria-hidden="true">❤</span>
-              </button>
+          <div class="letter card card--glass reveal">
+            <div class="letter__head">
+              <h2 class="section__title">Love Letter</h2>
+              <div class="letter__meta">For Shalini • with pure ishq</div>
             </div>
-            <div class="envelopeHint">Tap the pink heart to open the letter</div>
+            <div class="letter__body">
+              <p id="typedLetter" class="letter__typed" aria-live="polite"></p>
+              <div class="letter__cursor" aria-hidden="true"></div>
+            </div>
+            <div class="letter__actions">
+              <button id="retypeBtn" class="btn btn--soft" type="button">
+                Type Again
+              </button>
+              <a class="btn btn--soft" href="#shayari">Shayari Collection</a>
+            </div>
           </div>
         </div>
       </section>
@@ -402,32 +392,7 @@
           Tum meri zindagi ka woh sukoon ho jise main roz duaaon mein maangta hoon.
           Agar mohabbat ka rang hota, toh woh tumhari muskurahat jaisa hota.
         </div>
-        <div id="modalLine" class="modal__line"></div>
-        <div class="modal__actions">
-          <button id="modalMore" class="btn btn--soft" type="button">One More Line</button>
-          <button id="modalOk" class="btn btn--primary" type="button">Okay</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="letterModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
-      <div class="modal__backdrop" data-close="true"></div>
-      <div class="modal__panel card--glass modal__panel--letter" role="document">
-        <button class="modal__close" type="button" aria-label="Close" data-close="true">×</button>
-        <div class="paper card">
-          <div class="paper__head">
-            <div class="paper__title">Love Letter</div>
-            <div class="paper__meta">Only for Shalini</div>
-          </div>
-          <div class="paper__body">
-            <p id="typedLetter" class="paper__typed" aria-live="polite"></p>
-            <div class="paper__cursor" aria-hidden="true"></div>
-          </div>
-          <div class="paper__actions">
-            <button id="retypeBtn" class="btn btn--primary" type="button">Type Again</button>
-            <button id="letterClose" class="btn btn--soft" type="button" data-close="true">Close</button>
-          </div>
-        </div>
+        <button id="modalOk" class="btn btn--primary" type="button">Okay</button>
       </div>
     </div>
 
@@ -435,10 +400,9 @@
 
     <audio
       id="bgMusic"
-      preload="metadata"
+      preload="auto"
       playsinline
-      src="./Barbaad.mp3"
-      data-playlist="Barbaad.mp3|arzu.mp3|your.mp3|Khat.mp3|Kitab.mp3"
+      data-playlist="Barbaad.mp3|arzu.mp3|your.mp3|Khat.mp3"
     ></audio>
 
     <script src="./script.js"></script>
