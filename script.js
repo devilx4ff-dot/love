@@ -1,30 +1,11 @@
 const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
 
-const PERF = { lowEnd: false };
-const STORAGE = {
-  perfLow: "lv_perf_low",
-  volume: "lv_volume",
-  shuffle: "lv_shuffle",
-};
-
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
 function rand(min, max) {
   return Math.random() * (max - min) + min;
-}
-
-function getPerfProfile() {
-  const cores = Number(navigator.hardwareConcurrency || 0);
-  const mem = Number(navigator.deviceMemory || 0);
-  const saveData = Boolean(navigator.connection?.saveData);
-  const stored = window.localStorage?.getItem(STORAGE.perfLow);
-  const forcedLow = stored === "1";
-  const forcedHigh = stored === "0";
-  const autoLow = prefersReducedMotion || saveData || (cores > 0 && cores <= 4) || (mem > 0 && mem <= 4);
-  const lowEnd = forcedHigh ? false : forcedLow ? true : autoLow;
-  return { lowEnd };
 }
 
 function setupToast() {
@@ -67,20 +48,13 @@ function setupReveal() {
 }
 
 function setupFloatingHearts() {
-  let last = 0;
-  let alive = 0;
   const onPointer = (ev) => {
     if (prefersReducedMotion) return;
-    const now = performance.now();
-    const minGap = PERF.lowEnd ? 180 : 90;
-    if (now - last < minGap) return;
-    last = now;
     const x = ev.clientX ?? (ev.touches?.[0]?.clientX ?? window.innerWidth / 2);
     const y = ev.clientY ?? (ev.touches?.[0]?.clientY ?? window.innerHeight / 2);
 
-    const count = PERF.lowEnd ? 1 + Math.floor(Math.random() * 2) : 3 + Math.floor(Math.random() * 3);
+    const count = 3 + Math.floor(Math.random() * 3);
     for (let i = 0; i < count; i += 1) {
-      if (alive > (PERF.lowEnd ? 10 : 22)) return;
       const heart = document.createElement("div");
       heart.className = "float-heart";
       heart.style.left = `${x + rand(-10, 10)}px`;
@@ -89,11 +63,7 @@ function setupFloatingHearts() {
       heart.style.transform = `translate(-50%, -50%) rotate(45deg) scale(${rand(0.85, 1.2)})`;
       heart.style.filter = `drop-shadow(0 12px 18px rgba(255, 95, 162, ${rand(0.12, 0.26)}))`;
       document.body.appendChild(heart);
-      alive += 1;
-      window.setTimeout(() => {
-        heart.remove();
-        alive = Math.max(0, alive - 1);
-      }, 1900);
+      window.setTimeout(() => heart.remove(), 1900);
     }
   };
 
@@ -143,10 +113,6 @@ function setupMusic() {
 
   let isOn = false;
   let hasError = false;
-  let toastRef = null;
-  const storedVol = Number(window.localStorage?.getItem(STORAGE.volume));
-  if (!Number.isNaN(storedVol)) audio.volume = clamp(storedVol, 0, 1);
-  else audio.volume = 0.6;
 
   const setSource = (src) => {
     hasError = false;
@@ -167,22 +133,17 @@ function setupMusic() {
   const play = async (opts = {}) => {
     try {
       if (hasError) return false;
-      toastRef = opts?.toast ?? toastRef;
       if (opts?.toast) opts.toast.show("Starting music…", 1400);
       audio.muted = false;
+      audio.volume = 0.6;
       await audio.play();
       isOn = true;
       render();
       return true;
-    } catch (err) {
+    } catch {
       isOn = false;
       render();
-      const name = err?.name || "";
-      if (opts?.toast) {
-        if (name === "NotAllowedError") opts.toast.show("Tap Play/Music once to start.", 3200);
-        else if (name === "NotSupportedError") opts.toast.show("Song format not supported.", 3200);
-        else opts.toast.show("Music could not start. Tap once and try again.", 3200);
-      }
+      if (opts?.toast) opts.toast.show("Music blocked — tap the Music button once.", 3200);
       return false;
     }
   };
@@ -196,24 +157,20 @@ function setupMusic() {
   const tryAuto = async (opts = {}) => {
     try {
       if (hasError) return false;
-      toastRef = opts?.toast ?? toastRef;
       audio.muted = true;
       await audio.play();
       window.setTimeout(() => {
         audio.muted = false;
+        audio.volume = 0.6;
       }, 200);
       isOn = true;
       render();
       return true;
-    } catch (err) {
+    } catch {
       audio.muted = false;
       isOn = false;
       render();
-      if (opts?.toast) {
-        const name = err?.name || "";
-        if (name === "NotAllowedError") opts.toast.show("Tap Play/Music once to start.", 3200);
-        else opts.toast.show("Tap once to enable music.", 3200);
-      }
+      if (opts?.toast) opts.toast.show("Tap anywhere to enable music.", 3200);
       return false;
     }
   };
@@ -227,7 +184,6 @@ function setupMusic() {
     hasError = true;
     isOn = false;
     render();
-    toastRef?.show?.("Song not loading. Check file name + refresh.", 3600);
   });
 
   audio.addEventListener("playing", () => {
@@ -274,41 +230,19 @@ function setupPlaylist(music, toast) {
 
   let index = 0;
   const listeners = new Set();
-  let shuffle = window.localStorage?.getItem(STORAGE.shuffle) === "1";
 
   const toUrl = (name) => `./${encodeURIComponent(name)}`;
-  const currentName = () => {
-    const src = audio.getAttribute("src") || audio.currentSrc || "";
-    const last = src.split("/").pop() || "";
-    try {
-      return decodeURIComponent(last.split("?")[0]);
-    } catch {
-      return last.split("?")[0];
-    }
-  };
 
   const setIndex = (i) => {
     index = ((i % list.length) + list.length) % list.length;
-    const active = list[index];
-    const cur = currentName();
-    if (!cur || cur.toLowerCase() !== String(active).toLowerCase()) {
-      music.setSource(toUrl(active));
-    }
-    for (const cb of listeners) cb({ index, name: list[index], list: [...list], shuffle });
+    music.setSource(toUrl(list[index]));
+    for (const cb of listeners) cb({ index, name: list[index], list: [...list] });
   };
 
-  const cur = currentName();
-  const found = cur ? list.findIndex((x) => x.toLowerCase() === String(cur).toLowerCase()) : -1;
-  setIndex(found >= 0 ? found : 0);
+  setIndex(0);
 
   audio.addEventListener("ended", async () => {
-    if (shuffle && list.length > 1) {
-      let next = index;
-      while (next === index) next = Math.floor(Math.random() * list.length);
-      setIndex(next);
-    } else {
-      setIndex(index + 1);
-    }
+    setIndex(index + 1);
     toast?.show(`Now playing: ${list[index]}`, 2200);
     if (music.isOn && !music.hasError) await music.play({ toast });
   });
@@ -325,32 +259,10 @@ function setupPlaylist(music, toast) {
     return true;
   };
 
-  const next = () => {
-    if (shuffle && list.length > 1) {
-      let n = index;
-      while (n === index) n = Math.floor(Math.random() * list.length);
-      setIndex(n);
-    } else setIndex(index + 1);
-  };
-
-  const prev = () => {
-    if (shuffle && list.length > 1) {
-      let n = index;
-      while (n === index) n = Math.floor(Math.random() * list.length);
-      setIndex(n);
-    } else setIndex(index - 1);
-  };
-
-  const setShuffle = (value) => {
-    shuffle = Boolean(value);
-    window.localStorage?.setItem(STORAGE.shuffle, shuffle ? "1" : "0");
-    for (const cb of listeners) cb({ index, name: list[index], list: [...list], shuffle });
-  };
-
   const onChange = (cb) => {
     if (typeof cb !== "function") return () => {};
     listeners.add(cb);
-    cb({ index, name: list[index], list: [...list], shuffle });
+    cb({ index, name: list[index], list: [...list] });
     return () => listeners.delete(cb);
   };
 
@@ -362,13 +274,7 @@ function setupPlaylist(music, toast) {
     get name() {
       return list[index];
     },
-    get shuffle() {
-      return shuffle;
-    },
     setTrackByName,
-    next,
-    prev,
-    setShuffle,
     onChange,
   };
 }
@@ -397,154 +303,6 @@ function setupPlaylistUI(playlist, music, toast) {
       playlist.setTrackByName(name);
       toast?.show(`Now playing: ${name}`, 1800);
       if (!music?.hasError) await music.play({ toast });
-    });
-  }
-}
-
-function setupPerfToggle(toast) {
-  const btn = document.getElementById("perfToggle");
-  if (!(btn instanceof HTMLButtonElement)) return;
-
-  const stored = window.localStorage?.getItem(STORAGE.perfLow);
-  const isForcedLow = stored === "1";
-  const isForcedHigh = stored === "0";
-  const on = isForcedLow ? true : isForcedHigh ? false : PERF.lowEnd;
-  btn.dataset.on = on ? "true" : "false";
-  btn.setAttribute("aria-pressed", on ? "true" : "false");
-  const label = btn.querySelector(".chip__text");
-  if (label) label.textContent = `Lite: ${on ? "On" : "Off"}`;
-
-  btn.addEventListener("click", () => {
-    const next = on ? "0" : "1";
-    window.localStorage?.setItem(STORAGE.perfLow, next);
-    toast?.show("Applying performance mode…", 1600);
-    window.setTimeout(() => window.location.reload(), 250);
-  });
-}
-
-function setupPlayerUI(playlist, music, toast) {
-  const audio = document.getElementById("bgMusic");
-  const title = document.getElementById("playerTitle");
-  const playPause = document.getElementById("playPauseBtn");
-  const prev = document.getElementById("prevBtn");
-  const next = document.getElementById("nextBtn");
-  const shuffle = document.getElementById("shuffleBtn");
-  const seek = document.getElementById("seek");
-  const timeNow = document.getElementById("timeNow");
-  const timeTotal = document.getElementById("timeTotal");
-
-  if (!(audio instanceof HTMLAudioElement)) return;
-  if (!(playPause instanceof HTMLButtonElement)) return;
-
-  const fmt = (sec) => {
-    const s = Number.isFinite(sec) ? Math.max(0, Math.floor(sec)) : 0;
-    const h = Math.floor(s / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const r = s % 60;
-    const mm = String(m).padStart(h ? 2 : 1, "0");
-    const ss = String(r).padStart(2, "0");
-    return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
-  };
-
-  const setTitle = (name) => {
-    if (title instanceof HTMLElement) title.textContent = name || "—";
-  };
-
-  const renderPlay = () => {
-    playPause.textContent = audio.paused ? "⏵" : "⏸";
-  };
-
-  const renderShuffle = (on) => {
-    if (!(shuffle instanceof HTMLButtonElement)) return;
-    shuffle.dataset.on = on ? "true" : "false";
-    shuffle.setAttribute("aria-pressed", on ? "true" : "false");
-  };
-
-  const syncDuration = () => {
-    if (!(seek instanceof HTMLInputElement)) return;
-    const d = audio.duration;
-    if (!Number.isFinite(d) || d <= 0) {
-      seek.max = "100";
-      if (timeTotal instanceof HTMLElement) timeTotal.textContent = "0:00";
-      return;
-    }
-    seek.max = String(d);
-    if (timeTotal instanceof HTMLElement) timeTotal.textContent = fmt(d);
-  };
-
-  let isSeeking = false;
-
-  const syncTime = () => {
-    if (!(seek instanceof HTMLInputElement)) return;
-    if (isSeeking) return;
-    const t = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
-    seek.value = String(t);
-    if (timeNow instanceof HTMLElement) timeNow.textContent = fmt(t);
-  };
-
-  playlist?.onChange?.(({ name, shuffle: sh }) => {
-    setTitle(name);
-    renderShuffle(Boolean(sh));
-    syncDuration();
-    syncTime();
-  });
-
-  audio.addEventListener("play", renderPlay);
-  audio.addEventListener("pause", renderPlay);
-  audio.addEventListener("ended", renderPlay);
-  audio.addEventListener("loadedmetadata", syncDuration);
-  audio.addEventListener("durationchange", syncDuration);
-  audio.addEventListener("timeupdate", syncTime);
-  renderPlay();
-  syncDuration();
-  syncTime();
-
-  playPause.addEventListener("click", async () => {
-    if (audio.paused) await music.play({ toast });
-    else music.pause();
-    renderPlay();
-  });
-
-  if (prev instanceof HTMLButtonElement) {
-    prev.addEventListener("click", async () => {
-      playlist?.prev?.();
-      await music.play({ toast });
-    });
-  }
-
-  if (next instanceof HTMLButtonElement) {
-    next.addEventListener("click", async () => {
-      playlist?.next?.();
-      await music.play({ toast });
-    });
-  }
-
-  if (shuffle instanceof HTMLButtonElement) {
-    shuffle.addEventListener("click", () => {
-      const nextState = !Boolean(playlist?.shuffle);
-      playlist?.setShuffle?.(nextState);
-      toast?.show(`Shuffle: ${nextState ? "On" : "Off"}`, 1600);
-    });
-  }
-
-  if (seek instanceof HTMLInputElement) {
-    seek.addEventListener("pointerdown", () => {
-      isSeeking = true;
-    });
-    seek.addEventListener("pointerup", () => {
-      isSeeking = false;
-      const value = Number(seek.value);
-      if (Number.isFinite(value)) audio.currentTime = value;
-      syncTime();
-    });
-    seek.addEventListener("input", () => {
-      const value = Number(seek.value);
-      if (timeNow instanceof HTMLElement) timeNow.textContent = fmt(value);
-    });
-    seek.addEventListener("change", () => {
-      const value = Number(seek.value);
-      if (Number.isFinite(value)) audio.currentTime = value;
-      syncTime();
     });
   }
 }
@@ -632,7 +390,7 @@ function setupCanvasBackground() {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  const dpr = PERF.lowEnd ? 1 : Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
   const state = {
     w: 0,
     h: 0,
@@ -651,12 +409,8 @@ function setupCanvasBackground() {
     canvas.style.height = `${h}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const heartsTarget = PERF.lowEnd
-      ? clamp(Math.floor((w * h) / 78000), 10, 22)
-      : clamp(Math.floor((w * h) / 38000), 18, 48);
-    const starsTarget = PERF.lowEnd
-      ? clamp(Math.floor((w * h) / 52000), 14, 34)
-      : clamp(Math.floor((w * h) / 24000), 26, 70);
+    const heartsTarget = clamp(Math.floor((w * h) / 38000), 18, 48);
+    const starsTarget = clamp(Math.floor((w * h) / 24000), 26, 70);
     state.hearts = Array.from({ length: heartsTarget }, () => makeHeart(w, h));
     state.stars = Array.from({ length: starsTarget }, () => makeStar(w, h));
   };
@@ -689,7 +443,7 @@ function setupCanvasBackground() {
     ctx.globalAlpha = alpha;
     ctx.fillStyle = `hsla(${hue}, 92%, 70%, ${alpha})`;
     ctx.shadowColor = `hsla(${hue}, 92%, 70%, ${alpha})`;
-    ctx.shadowBlur = PERF.lowEnd ? 8 : 14;
+    ctx.shadowBlur = 14;
     const s = size;
     ctx.beginPath();
     ctx.moveTo(0, -s * 0.15);
@@ -700,17 +454,7 @@ function setupCanvasBackground() {
     ctx.restore();
   };
 
-  const targetFps = PERF.lowEnd ? 30 : 60;
-  const frameMs = 1000 / targetFps;
-  let last = 0;
-  let running = true;
-
-  const tick = (now = 0) => {
-    if (!running) return;
-    if (!prefersReducedMotion) window.requestAnimationFrame(tick);
-    if (!now) return;
-    if (now - last < frameMs) return;
-    last = now;
+  const tick = () => {
     state.t += 1;
     ctx.clearRect(0, 0, state.w, state.h);
 
@@ -720,7 +464,7 @@ function setupCanvasBackground() {
       ctx.globalAlpha = a;
       ctx.fillStyle = "rgba(255,255,255,1)";
       ctx.shadowColor = "rgba(255,255,255,.55)";
-      ctx.shadowBlur = PERF.lowEnd ? 6 : 10;
+      ctx.shadowBlur = 10;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fill();
@@ -740,38 +484,17 @@ function setupCanvasBackground() {
 
       drawHeart(h.x, h.y, h.r, h.rot, h.a, h.hue);
     }
+
+    if (!prefersReducedMotion) window.requestAnimationFrame(tick);
   };
 
   resize();
   window.addEventListener("resize", resize, { passive: true });
 
-  if (PERF.lowEnd) {
-    ctx.clearRect(0, 0, state.w, state.h);
-    ctx.globalAlpha = 0.18;
-    ctx.fillStyle = "rgba(255,255,255,1)";
-    for (const s of state.stars) {
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    for (const h of state.hearts) {
-      drawHeart(h.x, h.y, h.r, h.rot, h.a * 0.85, h.hue);
-    }
-    return;
-  }
-
   if (prefersReducedMotion) {
     tick();
     return;
   }
-  const onVisibility = () => {
-    running = document.visibilityState !== "hidden";
-    if (running) {
-      last = 0;
-      window.requestAnimationFrame(tick);
-    }
-  };
-  document.addEventListener("visibilitychange", onVisibility, { passive: true });
   window.requestAnimationFrame(tick);
 }
 
@@ -782,10 +505,7 @@ function setupSurpriseMusicBridge(music) {
 }
 
 function init() {
-  Object.assign(PERF, getPerfProfile());
-  if (PERF.lowEnd) document.body.classList.add("perf-low");
   const toast = setupToast();
-  setupPerfToggle(toast);
   setupCanvasBackground();
   setupReveal();
   setupFloatingHearts();
@@ -795,7 +515,6 @@ function init() {
   setupSurpriseMusicBridge(music);
   const playlist = setupPlaylist(music, toast);
   setupPlaylistUI(playlist, music, toast);
-  setupPlayerUI(playlist, music, toast);
 
   music.tryAuto({ toast });
 
