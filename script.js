@@ -102,15 +102,33 @@ function setupFloatingHearts() {
   document.addEventListener("touchstart", onPointer, { passive: true });
 }
 
-function setupModal() {
+function setupModal(lines) {
   const modal = document.getElementById("modal");
   const btn = document.getElementById("surpriseBtn");
   const ok = document.getElementById("modalOk");
+  const more = document.getElementById("modalMore");
+  const line = document.getElementById("modalLine");
+
+  const pool = Array.isArray(lines) ? lines.filter(Boolean) : [];
+  let last = "";
+
+  const pick = () => {
+    if (!(line instanceof HTMLElement)) return;
+    if (!pool.length) {
+      line.textContent = "Shalini, tum mere ishq ka sabse haseen asar ho.";
+      return;
+    }
+    let next = last;
+    for (let i = 0; i < 6 && next === last; i += 1) next = pool[Math.floor(Math.random() * pool.length)];
+    last = next;
+    line.textContent = next;
+  };
 
   const open = () => {
     modal.dataset.open = "true";
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
+    pick();
   };
 
   const close = () => {
@@ -121,6 +139,7 @@ function setupModal() {
 
   btn?.addEventListener("click", open);
   ok?.addEventListener("click", close);
+  more?.addEventListener("click", pick);
 
   modal?.addEventListener("click", (e) => {
     const target = e.target;
@@ -426,159 +445,10 @@ function setupPerfToggle(toast) {
   });
 }
 
-function setupPlayerUI(playlist, music, toast) {
-  const audio = document.getElementById("bgMusic");
-  const title = document.getElementById("playerTitle");
-  const playPause = document.getElementById("playPauseBtn");
-  const prev = document.getElementById("prevBtn");
-  const next = document.getElementById("nextBtn");
-  const shuffle = document.getElementById("shuffleBtn");
-  const mute = document.getElementById("muteBtn");
-  const seek = document.getElementById("seek");
-  const timeNow = document.getElementById("timeNow");
-  const timeTotal = document.getElementById("timeTotal");
-
-  if (!(audio instanceof HTMLAudioElement)) return;
-  if (!(playPause instanceof HTMLButtonElement)) return;
-
-  const fmt = (sec) => {
-    const s = Number.isFinite(sec) ? Math.max(0, Math.floor(sec)) : 0;
-    const h = Math.floor(s / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const r = s % 60;
-    const mm = String(m).padStart(h ? 2 : 1, "0");
-    const ss = String(r).padStart(2, "0");
-    return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
-  };
-
-  const setTitle = (name) => {
-    if (title instanceof HTMLElement) title.textContent = name || "—";
-  };
-
-  const renderPlay = () => {
-    playPause.textContent = audio.paused ? "⏵" : "⏸";
-  };
-
-  const renderShuffle = (on) => {
-    if (!(shuffle instanceof HTMLButtonElement)) return;
-    shuffle.dataset.on = on ? "true" : "false";
-    shuffle.setAttribute("aria-pressed", on ? "true" : "false");
-  };
-
-  const renderMute = () => {
-    if (!(mute instanceof HTMLButtonElement)) return;
-    const on = Boolean(audio.muted);
-    mute.dataset.on = on ? "true" : "false";
-    mute.setAttribute("aria-pressed", on ? "true" : "false");
-    mute.textContent = on ? "🔇" : "🔊";
-  };
-
-  const syncDuration = () => {
-    if (!(seek instanceof HTMLInputElement)) return;
-    const d = audio.duration;
-    if (!Number.isFinite(d) || d <= 0) {
-      seek.max = "100";
-      if (timeTotal instanceof HTMLElement) timeTotal.textContent = "0:00";
-      return;
-    }
-    seek.max = String(d);
-    if (timeTotal instanceof HTMLElement) timeTotal.textContent = fmt(d);
-  };
-
-  let isSeeking = false;
-
-  const syncTime = () => {
-    if (!(seek instanceof HTMLInputElement)) return;
-    if (isSeeking) return;
-    const t = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
-    seek.value = String(t);
-    if (timeNow instanceof HTMLElement) timeNow.textContent = fmt(t);
-  };
-
-  playlist?.onChange?.(({ name, shuffle: sh }) => {
-    setTitle(name);
-    renderShuffle(Boolean(sh));
-    syncDuration();
-    syncTime();
-  });
-
-  audio.addEventListener("play", renderPlay);
-  audio.addEventListener("pause", renderPlay);
-  audio.addEventListener("ended", renderPlay);
-  audio.addEventListener("loadedmetadata", syncDuration);
-  audio.addEventListener("durationchange", syncDuration);
-  audio.addEventListener("timeupdate", syncTime);
-  audio.addEventListener("volumechange", renderMute);
-  renderPlay();
-  renderMute();
-  syncDuration();
-  syncTime();
-
-  playPause.addEventListener("click", async () => {
-    if (audio.paused) await music.play({ toast });
-    else music.pause();
-    renderPlay();
-  });
-
-  if (prev instanceof HTMLButtonElement) {
-    prev.addEventListener("click", async () => {
-      playlist?.prev?.();
-      await music.play({ toast });
-    });
-  }
-
-  if (next instanceof HTMLButtonElement) {
-    next.addEventListener("click", async () => {
-      playlist?.next?.();
-      await music.play({ toast });
-    });
-  }
-
-  if (shuffle instanceof HTMLButtonElement) {
-    shuffle.addEventListener("click", () => {
-      const nextState = !Boolean(playlist?.shuffle);
-      playlist?.setShuffle?.(nextState);
-      toast?.show(`Shuffle: ${nextState ? "On" : "Off"}`, 1600);
-    });
-  }
-
-  if (mute instanceof HTMLButtonElement) {
-    mute.addEventListener("click", () => {
-      const nextState = !audio.muted;
-      audio.muted = nextState;
-      window.localStorage?.setItem(STORAGE.muted, nextState ? "1" : "0");
-      renderMute();
-      toast?.show(nextState ? "Muted" : "Unmuted", 1200);
-    });
-  }
-
-  if (seek instanceof HTMLInputElement) {
-    seek.addEventListener("pointerdown", () => {
-      isSeeking = true;
-    });
-    seek.addEventListener("pointerup", () => {
-      isSeeking = false;
-      const value = Number(seek.value);
-      if (Number.isFinite(value)) audio.currentTime = value;
-      syncTime();
-    });
-    seek.addEventListener("input", () => {
-      const value = Number(seek.value);
-      if (timeNow instanceof HTMLElement) timeNow.textContent = fmt(value);
-    });
-    seek.addEventListener("change", () => {
-      const value = Number(seek.value);
-      if (Number.isFinite(value)) audio.currentTime = value;
-      syncTime();
-    });
-  }
-}
-
 function setupTypingLetter() {
   const el = document.getElementById("typedLetter");
   const retype = document.getElementById("retypeBtn");
-  const section = document.getElementById("letter");
-  if (!(el instanceof HTMLElement) || !(section instanceof HTMLElement)) return;
+  if (!(el instanceof HTMLElement)) return { start: () => {} };
 
   const letter =
     "Shalini,\n\n" +
@@ -634,20 +504,47 @@ function setupTypingLetter() {
   };
 
   retype?.addEventListener("click", start);
+  return { start };
+}
 
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) {
-          if (!started) start();
-          io.disconnect();
-        }
-      }
-    },
-    { threshold: 0.25 }
-  );
+function setupEnvelope(typing, toast) {
+  const envelope = document.getElementById("envelope");
+  const seal = document.getElementById("envelopeSeal");
+  const modal = document.getElementById("letterModal");
+  if (!(envelope instanceof HTMLElement) || !(seal instanceof HTMLButtonElement) || !(modal instanceof HTMLElement)) return;
 
-  io.observe(section);
+  const open = () => {
+    modal.classList.remove("is-anim");
+    modal.dataset.open = "true";
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    envelope.setAttribute("aria-expanded", "true");
+    toast?.show("A letter just for Shalini…", 2000);
+    window.requestAnimationFrame(() => modal.classList.add("is-anim"));
+    window.setTimeout(() => typing?.start?.(), 180);
+  };
+
+  const close = () => {
+    modal.classList.remove("is-anim");
+    delete modal.dataset.open;
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  };
+
+  seal.addEventListener("click", open);
+  envelope.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") open();
+  });
+
+  modal.addEventListener("click", (e) => {
+    const target = e.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (target.dataset.close === "true") close();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.dataset.open === "true") close();
+  });
 }
 
 function setupCanvasBackground() {
@@ -806,21 +703,48 @@ function setupSurpriseMusicBridge(music) {
   btn.addEventListener("click", () => music.play(), { once: true });
 }
 
+function setupScrollProgress() {
+  const bar = document.getElementById("scrollProgress");
+  if (!(bar instanceof HTMLElement)) return;
+
+  let raf = 0;
+  const update = () => {
+    raf = 0;
+    const doc = document.documentElement;
+    const max = Math.max(1, doc.scrollHeight - window.innerHeight);
+    const v = Math.max(0, Math.min(1, window.scrollY / max));
+    bar.style.width = `${v * 100}%`;
+  };
+
+  const onScroll = () => {
+    if (raf) return;
+    raf = window.requestAnimationFrame(update);
+  };
+
+  update();
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll, { passive: true });
+}
+
 function init() {
   Object.assign(PERF, getPerfProfile());
   if (PERF.lowEnd) document.body.classList.add("perf-low");
   const toast = setupToast();
   setupPerfToggle(toast);
+  setupScrollProgress();
   setupCanvasBackground();
   setupReveal();
   setupFloatingHearts();
-  setupTypingLetter();
-  setupModal();
+  const typing = setupTypingLetter();
+  setupEnvelope(typing, toast);
+  const shayariLines = Array.from(document.querySelectorAll(".shayari p"))
+    .map((el) => (el instanceof HTMLElement ? el.innerText.trim() : ""))
+    .filter(Boolean);
+  setupModal(shayariLines);
   const music = setupMusic();
   setupSurpriseMusicBridge(music);
   const playlist = setupPlaylist(music, toast);
   setupPlaylistUI(playlist, music, toast);
-  setupPlayerUI(playlist, music, toast);
 
   music.tryAuto({ toast });
 
