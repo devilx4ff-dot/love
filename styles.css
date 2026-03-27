@@ -656,9 +656,15 @@ body.perf-low .card--glass{backdrop-filter:none}
   border-color:rgba(255,95,162,.40);
   box-shadow:0 18px 46px rgba(255,95,162,.16), 0 0 0 1px rgba(255,255,255,.10) inset;
 }
-.player__right{display:flex;align-items:center}
-.player__vol{
-  width:120px;
+.player__right{display:grid;align-items:center;gap:6px;justify-items:end}
+.player__time{
+  font-size:11px;
+  color:rgba(255,255,255,.70);
+  letter-spacing:.2px;
+}
+.player__sep{opacity:.6;margin:0 6px}
+.player__seek{
+  width:220px;
   accent-color:var(--pink);
 }
 body.perf-low .player{backdrop-filter:none}
@@ -815,6 +821,7 @@ body.perf-low .reveal{filter:none;transition:opacity .7s var(--ease), transform 
   .gallery__grid{grid-template-columns:repeat(2, 1fr)}
   .playlist__grid{grid-template-columns:repeat(2, 1fr)}
   .player{grid-template-columns:1fr auto;gap:10px}
-  .player__right{display:none}
-  .player__title{max-width:58vw}
+  .player__right{justify-items:end}
+  .player__seek{width:160px}
+  .player__title{max-width:56vw}
 }

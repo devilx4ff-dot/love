@@ -137,6 +137,13 @@
                     <div class="track__file">Khat.mp3</div>
                   </div>
                 </button>
+                <button class="track" type="button" data-track="Kitab.mp3">
+                  <div class="track__cover" style="--cover:url('./kitab.jpg')"></div>
+                  <div class="track__meta">
+                    <div class="track__name">Kitab</div>
+                    <div class="track__file">Kitab.mp3</div>
+                  </div>
+                </button>
               </div>
               <div id="nowPlaying" class="playlist__now">Now playing: Barbaad.mp3</div>
               <div class="playlist__note">Tap any cover to play that song.</div>
@@ -414,16 +421,12 @@
         <button id="shuffleBtn" class="pbtn" type="button" aria-pressed="false" aria-label="Shuffle">⤮</button>
       </div>
       <div class="player__right">
-        <input
-          id="volume"
-          class="player__vol"
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value="0.6"
-          aria-label="Volume"
-        />
+        <div class="player__time" aria-hidden="true">
+          <span id="timeNow">0:00</span>
+          <span class="player__sep">/</span>
+          <span id="timeTotal">0:00</span>
+        </div>
+        <input id="seek" class="player__seek" type="range" min="0" max="100" step="0.1" value="0" aria-label="Seek" />
       </div>
     </div>
 
@@ -431,7 +434,7 @@
       id="bgMusic"
       preload="auto"
       playsinline
-      data-playlist="Barbaad.mp3|arzu.mp3|your.mp3|Khat.mp3"
+      data-playlist="Barbaad.mp3|arzu.mp3|your.mp3|Khat.mp3|Kitab.mp3"
     ></audio>
 
     <script src="./script.js"></script>

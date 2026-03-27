@@ -401,10 +401,22 @@ function setupPlayerUI(playlist, music, toast) {
   const prev = document.getElementById("prevBtn");
   const next = document.getElementById("nextBtn");
   const shuffle = document.getElementById("shuffleBtn");
-  const vol = document.getElementById("volume");
+  const seek = document.getElementById("seek");
+  const timeNow = document.getElementById("timeNow");
+  const timeTotal = document.getElementById("timeTotal");
 
   if (!(audio instanceof HTMLAudioElement)) return;
   if (!(playPause instanceof HTMLButtonElement)) return;
+
+  const fmt = (sec) => {
+    const s = Number.isFinite(sec) ? Math.max(0, Math.floor(sec)) : 0;
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const r = s % 60;
+    const mm = String(m).padStart(h ? 2 : 1, "0");
+    const ss = String(r).padStart(2, "0");
+    return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+  };
 
   const setTitle = (name) => {
     if (title instanceof HTMLElement) title.textContent = name || "—";
@@ -420,15 +432,44 @@ function setupPlayerUI(playlist, music, toast) {
     shuffle.setAttribute("aria-pressed", on ? "true" : "false");
   };
 
+  const syncDuration = () => {
+    if (!(seek instanceof HTMLInputElement)) return;
+    const d = audio.duration;
+    if (!Number.isFinite(d) || d <= 0) {
+      seek.max = "100";
+      if (timeTotal instanceof HTMLElement) timeTotal.textContent = "0:00";
+      return;
+    }
+    seek.max = String(d);
+    if (timeTotal instanceof HTMLElement) timeTotal.textContent = fmt(d);
+  };
+
+  let isSeeking = false;
+
+  const syncTime = () => {
+    if (!(seek instanceof HTMLInputElement)) return;
+    if (isSeeking) return;
+    const t = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+    seek.value = String(t);
+    if (timeNow instanceof HTMLElement) timeNow.textContent = fmt(t);
+  };
+
   playlist?.onChange?.(({ name, shuffle: sh }) => {
     setTitle(name);
     renderShuffle(Boolean(sh));
+    syncDuration();
+    syncTime();
   });
 
   audio.addEventListener("play", renderPlay);
   audio.addEventListener("pause", renderPlay);
   audio.addEventListener("ended", renderPlay);
+  audio.addEventListener("loadedmetadata", syncDuration);
+  audio.addEventListener("durationchange", syncDuration);
+  audio.addEventListener("timeupdate", syncTime);
   renderPlay();
+  syncDuration();
+  syncTime();
 
   playPause.addEventListener("click", async () => {
     if (audio.paused) await music.play({ toast });
@@ -458,15 +499,24 @@ function setupPlayerUI(playlist, music, toast) {
     });
   }
 
-  if (vol instanceof HTMLInputElement) {
-    const stored = Number(window.localStorage?.getItem(STORAGE.volume));
-    const v = Number.isNaN(stored) ? audio.volume : clamp(stored, 0, 1);
-    audio.volume = v;
-    vol.value = String(v);
-    vol.addEventListener("input", () => {
-      const value = clamp(Number(vol.value), 0, 1);
-      audio.volume = value;
-      window.localStorage?.setItem(STORAGE.volume, String(value));
+  if (seek instanceof HTMLInputElement) {
+    seek.addEventListener("pointerdown", () => {
+      isSeeking = true;
+    });
+    seek.addEventListener("pointerup", () => {
+      isSeeking = false;
+      const value = Number(seek.value);
+      if (Number.isFinite(value)) audio.currentTime = value;
+      syncTime();
+    });
+    seek.addEventListener("input", () => {
+      const value = Number(seek.value);
+      if (timeNow instanceof HTMLElement) timeNow.textContent = fmt(value);
+    });
+    seek.addEventListener("change", () => {
+      const value = Number(seek.value);
+      if (Number.isFinite(value)) audio.currentTime = value;
+      syncTime();
     });
   }
 }
