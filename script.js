@@ -1,6 +1,6 @@
 const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
 
-const PERF = { lowEnd: false };
+const PERF = { lowEnd: false, scrolling: false };
 const STORAGE = {
   perfLow: "lv_perf_low",
   volume: "lv_volume",
@@ -633,6 +633,7 @@ function setupCanvasBackground() {
     if (!now) return;
     if (now - last < frameMs) return;
     last = now;
+    if (PERF.scrolling) return;
     state.t += 1;
     ctx.clearRect(0, 0, state.w, state.h);
 
@@ -708,15 +709,23 @@ function setupScrollProgress() {
   if (!(bar instanceof HTMLElement)) return;
 
   let raf = 0;
+  let timer = 0;
   const update = () => {
     raf = 0;
     const doc = document.documentElement;
     const max = Math.max(1, doc.scrollHeight - window.innerHeight);
     const v = Math.max(0, Math.min(1, window.scrollY / max));
-    bar.style.width = `${v * 100}%`;
+    bar.style.transform = `scaleX(${v})`;
   };
 
   const onScroll = () => {
+    PERF.scrolling = true;
+    document.body.classList.add("is-scrolling");
+    if (timer) window.clearTimeout(timer);
+    timer = window.setTimeout(() => {
+      PERF.scrolling = false;
+      document.body.classList.remove("is-scrolling");
+    }, 160);
     if (raf) return;
     raf = window.requestAnimationFrame(update);
   };
