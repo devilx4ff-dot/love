@@ -1,0 +1,9 @@
+{
+  "name": "Shalini — Meri Mohabbat",
+  "short_name": "Shalini Love",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#ff5fa2",
+  "background_color": "#0b0712",
+  "orientation": "portrait"
+}

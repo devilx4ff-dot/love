@@ -8,6 +8,8 @@ function rand(min, max) {
   return Math.random() * (max - min) + min;
 }
 
+const sparkleColors = ['rgba(255,95,162,0.8)', 'rgba(180,140,255,0.8)', 'rgba(255,211,168,0.8)', 'rgba(255,46,95,0.8)'];
+
 function setupToast() {
   const toast = document.getElementById("toast");
   if (!(toast instanceof HTMLElement)) return { show: () => {} };
@@ -27,7 +29,7 @@ function setupToast() {
 
 function setupReveal() {
   const items = Array.from(document.querySelectorAll(".reveal"));
-  if (prefersReducedMotion) {
+  if (prefersReducedMotion || !window.IntersectionObserver) {
     for (const el of items) el.classList.add("is-in");
     return;
   }
@@ -47,23 +49,42 @@ function setupReveal() {
   for (const el of items) io.observe(el);
 }
 
+function createSparkle(x, y) {
+  const sparkle = document.createElement("div");
+  sparkle.className = "sparkle";
+  sparkle.style.left = `${x}px`;
+  sparkle.style.top = `${y}px`;
+  sparkle.style.animationDuration = `${rand(0.5, 1)}s`;
+  const size = rand(4, 12);
+  sparkle.style.width = `${size}px`;
+  sparkle.style.height = `${size}px`;
+  sparkle.style.background = `radial-gradient(circle, ${sparkleColors[Math.floor(rand(0, sparkleColors.length))]}, transparent)`;
+  document.body.appendChild(sparkle);
+  window.setTimeout(() => sparkle.remove(), 1000);
+}
+
 function setupFloatingHearts() {
   const onPointer = (ev) => {
     if (prefersReducedMotion) return;
     const x = ev.clientX ?? (ev.touches?.[0]?.clientX ?? window.innerWidth / 2);
     const y = ev.clientY ?? (ev.touches?.[0]?.clientY ?? window.innerHeight / 2);
 
-    const count = 3 + Math.floor(Math.random() * 3);
+    // Sparkles
+    for (let i = 0; i < 10; i += 1) {
+      createSparkle(x + rand(-30, 30), y + rand(-30, 30));
+    }
+
+    const count = 5 + Math.floor(Math.random() * 5); // More hearts
     for (let i = 0; i < count; i += 1) {
       const heart = document.createElement("div");
       heart.className = "float-heart";
-      heart.style.left = `${x + rand(-10, 10)}px`;
-      heart.style.top = `${y + rand(-8, 8)}px`;
-      heart.style.animationDuration = `${rand(1.1, 1.65)}s`;
-      heart.style.transform = `translate(-50%, -50%) rotate(45deg) scale(${rand(0.85, 1.2)})`;
-      heart.style.filter = `drop-shadow(0 12px 18px rgba(255, 95, 162, ${rand(0.12, 0.26)}))`;
+      heart.style.left = `${x + rand(-20, 20)}px`;
+      heart.style.top = `${y + rand(-15, 15)}px`;
+      heart.style.animationDuration = `${rand(1, 1.5)}s`;
+      heart.style.transform = `translate(-50%, -50%) rotate(45deg) scale(${rand(0.8, 1.5)})`;
+      heart.style.filter = `drop-shadow(0 12px 18px rgba(255, 95, 162, ${rand(0.15, 0.35)}))`;
       document.body.appendChild(heart);
-      window.setTimeout(() => heart.remove(), 1900);
+      window.setTimeout(() => heart.remove(), 1500);
     }
   };
 
@@ -124,10 +145,11 @@ function setupMusic() {
   const render = () => {
     toggle.dataset.on = isOn ? "true" : "false";
     toggle.setAttribute("aria-pressed", isOn ? "true" : "false");
+    toggle.setAttribute("aria-label", isOn ? "Pause music" : "Play music");
     const label = toggle.querySelector(".chip__text");
     if (!label) return;
     if (hasError) label.textContent = "Music: Unavailable";
-    else label.textContent = `Music: ${isOn ? "On" : "Tap"}`;
+    else label.textContent = `Music: ${isOn ? "On" : "Off"}`;
   };
 
   const play = async (opts = {}) => {
@@ -178,6 +200,14 @@ function setupMusic() {
   toggle.addEventListener("click", () => {
     if (isOn) pause();
     else play();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key.toLowerCase() === "m") {
+      if (isOn) pause();
+      else play();
+      e.preventDefault();
+    }
   });
 
   audio.addEventListener("error", () => {
@@ -254,7 +284,10 @@ function setupPlaylist(music, toast) {
 
   const setTrackByName = (name) => {
     const idx = list.findIndex((x) => x.toLowerCase() === String(name).toLowerCase());
-    if (idx === -1) return false;
+    if (idx === -1) {
+      toast?.show(`Track not found: ${name}`, 2200);
+      return false;
+    }
     setIndex(idx);
     return true;
   };
@@ -288,7 +321,9 @@ function setupPlaylistUI(playlist, music, toast) {
     for (const el of tracks) {
       if (!(el instanceof HTMLElement)) continue;
       const name = el.dataset.track || "";
-      el.classList.toggle("is-active", name === activeName);
+      const isActive = name === activeName;
+      el.classList.toggle("is-active", isActive);
+      el.setAttribute("aria-pressed", String(isActive));
     }
     if (now instanceof HTMLElement) now.textContent = `Now playing: ${activeName}`;
   };
@@ -297,6 +332,8 @@ function setupPlaylistUI(playlist, music, toast) {
 
   for (const el of tracks) {
     if (!(el instanceof HTMLElement)) continue;
+    el.setAttribute("role", "button");
+    el.setAttribute("aria-pressed", "false");
     el.addEventListener("click", async () => {
       const name = el.dataset.track || "";
       if (!name) return;
@@ -498,6 +535,27 @@ function setupCanvasBackground() {
   window.requestAnimationFrame(tick);
 }
 
+function setupPWA() {
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const toast = setupToast();
+    toast.show('Tap to install as app!', 5000);
+    document.addEventListener('click', () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          }
+          deferredPrompt = null;
+        });
+      }
+    }, { once: true });
+  });
+}
+
 function setupSurpriseMusicBridge(music) {
   const btn = document.getElementById("surpriseBtn");
   if (!(btn instanceof HTMLButtonElement)) return;
@@ -515,6 +573,7 @@ function init() {
   setupSurpriseMusicBridge(music);
   const playlist = setupPlaylist(music, toast);
   setupPlaylistUI(playlist, music, toast);
+  // setupPWA();
 
   music.tryAuto({ toast });
 
@@ -525,6 +584,10 @@ function init() {
   };
   window.addEventListener("pointerdown", firstGesture, { once: true });
   window.addEventListener("keydown", firstGesture, { once: true });
+
+  // if ('serviceWorker' in navigator) {
+  //   navigator.serviceWorker.register('./sw.js');
+  // }
 }
 
 document.addEventListener("DOMContentLoaded", init);

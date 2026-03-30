@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ff5fa2" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Shalini — Meri Mohabbat</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,6 +15,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="manifest" href="./manifest.json" />
   </head>
   <body>
     <div class="bg" aria-hidden="true">
@@ -29,6 +33,7 @@
         <a href="#about">About</a>
         <a href="#letter">Love Letter</a>
         <a href="#shayari">Shayari</a>
+        <a href="#apology">Sorry</a>
         <a href="#message">Message</a>
       </nav>
       <div class="topbar__actions">
@@ -133,8 +138,13 @@
                     <div class="track__file">Khat.mp3</div>
                   </div>
                 </button>
-              </div>
-              <div id="nowPlaying" class="playlist__now">Now playing: Barbaad.mp3</div>
+                <button class="track" type="button" data-track="Kitab.mp3">
+                  <div class="track__cover" style="--cover:url('./kitab.jpg')"></div>
+                  <div class="track__meta">
+                    <div class="track__name">Kitab</div>
+                    <div class="track__file">Kitab.mp3</div>
+                  </div>
+                </button>
               <div class="playlist__note">Tap any cover to play that song.</div>
             </div>
           </div>
@@ -357,6 +367,80 @@
         </div>
       </section>
 
+      <section id="apology" class="section section--shayari">
+        <div class="section__inner">
+          <div class="shayari__head reveal">
+            <h2 class="section__title">Maafi Shayari</h2>
+            <p class="section__lead">
+              कुछ गलतियाँ हुईं, कुछ कमियाँ रहीं, अब दिल से माफी माँगता हूँ।
+            </p>
+          </div>
+
+          <div class="shayari__list" role="list">
+            <article class="shayari reveal" role="listitem">
+              <p>
+                दिल की किताब में लिखी कहानियाँ अधूरी रहीं,<br />
+                समय की धारा में बहते हुए खो गया था मैं।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                रूह की गहराई को जाना नहीं, दिल की धड़कन को सुना नहीं,<br />
+                अब पछतावा है मेरे अंदर, दर्द की रात लंबी है।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                प्यार की राह पर चलते-चलते, काँटे चुभ गए थे,<br />
+                अब निकालना चाहता हूँ उन्हें, दिल की मरहम से।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                समय की चाँदनी में खोया था, रात की अंधेरी राह पर,<br />
+                अब ढूँढ़ रहा हूँ उजाला, दिल की बातों में।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                मोहब्बत की नदी में डूबते हुए, साँस लेना भूल गया,<br />
+                अब साँस ले रहा हूँ, यादों की हवा से।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                दिल की धड़कन में छुपी कहानियाँ, सुनाई नहीं,<br />
+                अब सुन रहा हूँ, रूह की आवाज़ में।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                प्यार की किताब में लिखी लकीरें, मिटाई नहीं,<br />
+                अब मिटा रहा हूँ, आँसुओं की स्याही से।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                समय की धारा में बहते हुए, रुक गया था कदम,<br />
+                अब आगे बढ़ रहा हूँ, दिल की ताकत से।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                मोहब्बत की राह पर चलते हुए, रात लंबी हुई,<br />
+                अब सुबह का इंतजार है, दिल की उम्मीद में।
+              </p>
+            </article>
+            <article class="shayari reveal" role="listitem">
+              <p>
+                दिल की बातें सुनाई नहीं, रूह की गहराई को जाना नहीं,<br />
+                अब समझ रहा हूँ, प्यार की ज़ुबान से।
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <section id="message" class="section">
         <div class="section__inner">
           <div class="card card--glass reveal">
@@ -402,8 +486,22 @@
       id="bgMusic"
       preload="auto"
       playsinline
-      data-playlist="Barbaad.mp3|arzu.mp3|your.mp3|Khat.mp3"
+      data-playlist="Barbaad.mp3|arzu.mp3|your.mp3|Khat.mp3|Kitab.mp3"
     ></audio>
+
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/69cab02007aaa51c31a2a59e/1jkvrvvpt';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+    </script>
+    <!--End of Tawk.to Script-->
 
     <script src="./script.js"></script>
   </body>
