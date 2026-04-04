@@ -64,32 +64,40 @@ function createSparkle(x, y) {
 }
 
 function setupFloatingHearts() {
+  let lastBurstAt = 0;
+
   const onPointer = (ev) => {
     if (prefersReducedMotion) return;
+    const target = ev.target;
+    if (!(target instanceof Element)) return;
+    if (!target.closest(".btn, .track, .media-card__frame")) return;
+
+    const now = Date.now();
+    if (now - lastBurstAt < 220) return;
+    lastBurstAt = now;
+
     const x = ev.clientX ?? (ev.touches?.[0]?.clientX ?? window.innerWidth / 2);
     const y = ev.clientY ?? (ev.touches?.[0]?.clientY ?? window.innerHeight / 2);
 
-    // Sparkles
-    for (let i = 0; i < 10; i += 1) {
-      createSparkle(x + rand(-30, 30), y + rand(-30, 30));
+    for (let i = 0; i < 4; i += 1) {
+      createSparkle(x + rand(-20, 20), y + rand(-20, 20));
     }
 
-    const count = 5 + Math.floor(Math.random() * 5); // More hearts
+    const count = 2 + Math.floor(Math.random() * 2);
     for (let i = 0; i < count; i += 1) {
       const heart = document.createElement("div");
       heart.className = "float-heart";
-      heart.style.left = `${x + rand(-20, 20)}px`;
-      heart.style.top = `${y + rand(-15, 15)}px`;
-      heart.style.animationDuration = `${rand(1, 1.5)}s`;
-      heart.style.transform = `translate(-50%, -50%) rotate(45deg) scale(${rand(0.8, 1.5)})`;
-      heart.style.filter = `drop-shadow(0 12px 18px rgba(255, 95, 162, ${rand(0.15, 0.35)}))`;
+      heart.style.left = `${x + rand(-14, 14)}px`;
+      heart.style.top = `${y + rand(-10, 10)}px`;
+      heart.style.animationDuration = `${rand(0.9, 1.2)}s`;
+      heart.style.transform = `translate(-50%, -50%) rotate(45deg) scale(${rand(0.8, 1.1)})`;
+      heart.style.filter = `drop-shadow(0 8px 14px rgba(255, 95, 162, ${rand(0.12, 0.24)}))`;
       document.body.appendChild(heart);
-      window.setTimeout(() => heart.remove(), 1500);
+      window.setTimeout(() => heart.remove(), 1300);
     }
   };
 
   document.addEventListener("click", onPointer, { passive: true });
-  document.addEventListener("touchstart", onPointer, { passive: true });
 }
 
 function setupModal() {
@@ -405,6 +413,11 @@ function setupTypingLetter() {
 
   retype?.addEventListener("click", start);
 
+  if (!window.IntersectionObserver || prefersReducedMotion) {
+    start();
+    return;
+  }
+
   const io = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
@@ -446,8 +459,8 @@ function setupCanvasBackground() {
     canvas.style.height = `${h}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const heartsTarget = clamp(Math.floor((w * h) / 38000), 18, 48);
-    const starsTarget = clamp(Math.floor((w * h) / 24000), 26, 70);
+    const heartsTarget = clamp(Math.floor((w * h) / 92000), 8, 18);
+    const starsTarget = clamp(Math.floor((w * h) / 52000), 14, 32);
     state.hearts = Array.from({ length: heartsTarget }, () => makeHeart(w, h));
     state.stars = Array.from({ length: starsTarget }, () => makeStar(w, h));
   };
@@ -456,11 +469,11 @@ function setupCanvasBackground() {
     x: rand(0, w),
     y: rand(0, h),
     r: rand(4, 10),
-    vy: rand(0.22, 0.7),
-    vx: rand(-0.12, 0.12),
+    vy: rand(0.12, 0.32),
+    vx: rand(-0.05, 0.05),
     rot: rand(0, Math.PI * 2),
     vr: rand(-0.008, 0.008),
-    a: rand(0.15, 0.32),
+    a: rand(0.08, 0.18),
     hue: rand(320, 355),
   });
 
@@ -509,7 +522,7 @@ function setupCanvasBackground() {
 
     for (const h of state.hearts) {
       h.y -= h.vy;
-      h.x += h.vx + Math.sin((state.t + h.x) * 0.002) * 0.12;
+      h.x += h.vx + Math.sin((state.t + h.x) * 0.002) * 0.05;
       h.rot += h.vr;
 
       if (h.y < -20) {
@@ -533,6 +546,44 @@ function setupCanvasBackground() {
     return;
   }
   window.requestAnimationFrame(tick);
+}
+
+function setupMemoryVideos() {
+  const videos = Array.from(document.querySelectorAll(".media-card video"));
+  if (videos.length < 1) return;
+
+  for (const video of videos) {
+    if (!(video instanceof HTMLVideoElement)) continue;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.volume = 0;
+    video.playsInline = true;
+  }
+
+  if (!window.IntersectionObserver) {
+    for (const video of videos) {
+      if (video instanceof HTMLVideoElement) {
+        video.play().catch(() => {});
+      }
+    }
+    return;
+  }
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const video = entry.target;
+        if (!(video instanceof HTMLVideoElement)) continue;
+        if (entry.isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      }
+    },
+    { threshold: 0.35 }
+  );
+
+  for (const video of videos) {
+    if (video instanceof HTMLVideoElement) io.observe(video);
+  }
 }
 
 function setupPWA() {
@@ -567,6 +618,7 @@ function init() {
   setupCanvasBackground();
   setupReveal();
   setupFloatingHearts();
+  setupMemoryVideos();
   setupTypingLetter();
   setupModal();
   const music = setupMusic();
