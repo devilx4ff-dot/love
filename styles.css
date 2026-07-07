@@ -467,6 +467,7 @@ video{display:block;max-width:100%}
   background-size:cover;
   background-position:center;
 }
+
 .track__cover:after{
   content:"";
   position:absolute;
@@ -641,6 +642,150 @@ video{display:block;max-width:100%}
   color:rgba(255,255,255,.86);
   line-height:1.9;
   font-size:15px;
+}
+
+.special-date__head {
+  margin-bottom: 32px;
+  max-width: 800px;
+  width: 100%;
+}
+.countdown {
+  padding: 40px 24px;
+  text-align: center;
+  margin: 32px 0;
+  position: relative;
+  overflow: hidden;
+}
+.countdown::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(255, 95, 162, 0.08), transparent);
+  animation: rotateGlow 15s linear infinite;
+  pointer-events: none;
+}
+@keyframes rotateGlow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.countdown__title {
+  font-family: "Great Vibes", cursive;
+  font-size: 52px;
+  margin-bottom: 28px;
+  text-shadow: 0 0 28px rgba(255, 95, 162, 0.45), 0 0 48px rgba(180, 140, 255, 0.25);
+  color: var(--gold);
+  position: relative;
+  z-index: 1;
+}
+.countdown__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 28px 0;
+  position: relative;
+  z-index: 1;
+}
+.countdown__item {
+  background: linear-gradient(145deg, rgba(255, 95, 162, 0.22), rgba(180, 140, 255, 0.18));
+  background: linear-gradient(135deg, rgba(255, 95, 162, 0.25), rgba(180, 140, 255, 0.15));
+  border-radius: 24px;
+  padding: 24px 16px;
+  border: 1px solid rgba(255,255,255,0.22);
+  transition: transform 0.4s var(--ease);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.3);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.countdown__item:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.28), 0 0 32px rgba(255, 95, 162, 0.18);
+}
+.countdown__value {
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(255, 95, 162, 0.6), 0 0 40px rgba(255, 95, 162, 0.25);
+  line-height: 1;
+  position: relative;
+}
+.countdown__label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.78);
+  margin-top: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+.countdown__note {
+  font-size: 16px;
+  color: rgba(255,255,255,0.8);
+  margin-top: 20px;
+  line-height: 1.75;
+  position: relative;
+  z-index: 1;
+}
+.special-date__card {
+  margin-top: 28px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Tablets */
+@media (max-width: 900px) {
+  .countdown__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .countdown__title {
+    font-size: 44px;
+  }
+  .countdown__value {
+    font-size: 48px;
+  }
+}
+
+/* Large Mobiles */
+@media (max-width: 600px) {
+  .countdown {
+    padding: 32px 18px;
+  }
+  .countdown__grid {
+    gap: 12px;
+  }
+  .countdown__title {
+    font-size: 38px;
+  }
+  .countdown__value {
+    font-size: 40px;
+  }
+  .countdown__item {
+    padding: 18px 12px;
+    border-radius: 20px;
+  }
+  .countdown__label {
+    font-size: 12px;
+    margin-top: 8px;
+    letter-spacing: 1.2px;
+  }
+}
+
+/* Very Small Mobiles */
+@media (max-width: 380px) {
+  .countdown__title {
+    font-size: 32px;
+  }
+  .countdown__value {
+    font-size: 34px;
+  }
+  .countdown__item {
+    padding: 14px 10px;
+  }
+  .countdown__label {
+    font-size: 11px;
+  }
 }
 
 .footer{
