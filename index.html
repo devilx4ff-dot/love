@@ -18,6 +18,36 @@
     <link rel="manifest" href="./manifest.json" />
   </head>
   <body>
+    <!-- Love Letter Login Overlay -->
+    <div id="loginOverlay" class="login-overlay">
+      <div class="login-card">
+        <div class="login-envelope">
+          <div class="envelope-flap"></div>
+          <div class="envelope-seal">
+            <span class="seal-heart">❤</span>
+          </div>
+        </div>
+        <div class="login-content">
+          <h2 class="login-title">Meri Jaan, Open This Letter</h2>
+          <p class="login-subtitle">Enter our special date to unlock…</p>
+          <form id="loginForm" class="login-form">
+            <input 
+              type="text" 
+              id="passwordInput" 
+              class="login-input" 
+              placeholder="DD/MM/YY" 
+              autocomplete="off"
+              maxlength="8"
+            />
+            <button type="submit" class="login-btn btn btn--primary">
+              Unlock My Heart
+            </button>
+          </form>
+          <p id="loginError" class="login-error">Hmm, that's not our date… try again?</p>
+        </div>
+      </div>
+    </div>
+
     <div class="bg" aria-hidden="true">
       <canvas id="bgCanvas" class="bg__canvas"></canvas>
       <div class="bg__vignette"></div>
@@ -828,6 +858,35 @@
           </div>
         </div>
       </section>
+
+      <section id="contact" class="section">
+        <div class="section__inner">
+          <div class="contact-wrapper reveal">
+            <h2 class="section__title">Send Me a Message</h2>
+            <p class="section__lead">
+              Agar tumhe kuch kehna ho, bas likh do — yeh message meri Gmail par direct aa jayega!
+            </p>
+            <form id="contactForm" class="contact-form card card--glass">
+              <div class="form-group">
+                <label for="name" class="form-label">Your Name</label>
+                <input type="text" id="name" name="name" class="form-input" placeholder="Apna naam dijiye" required>
+              </div>
+              <div class="form-group">
+                <label for="email" class="form-label">Your Email</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="Apna email dijiye" required>
+              </div>
+              <div class="form-group">
+                <label for="message" class="form-label">Your Message</label>
+                <textarea id="messageInput" name="message" class="form-textarea" placeholder="Jo bhi dil mein ho, likh do…" rows="5" required></textarea>
+              </div>
+              <button type="submit" class="btn btn--primary btn--full">
+                Send Message
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
     </main>
 
     <footer class="footer">
@@ -859,19 +918,28 @@
       data-playlist="Barbaad.mp3|arzu.mp3|your.mp3|Khat.mp3|Kitab.mp3|Din Bisre  Rakesh Manral ft. Arti Mudela  Produced by Tristhav  Pahadi Indie Folk.mp3|Ishq De Fanniyar  Fukrey Returns  Jyotica Tangri  Shaarib & Toshi  Lyrical.mp3|Kabhi Jo Baadal Barse - 8K Video Song _ Arijit Singh _ Sunny Leone _ Sharib & Toshi _ Jackpot.mp3|Lyrical  Dhun Song  Saiyaara  Ahaan Panday, Aneet Padda  Mithoon  Arijit Singh.mp3|Lyrical  Humsafar Song  Saiyaara  Ahaan, Aneet  Sachet Tandon, Parampara Tandon, Irshad Kamil.mp3|MERI BATHINA  ROHIT CHAUHAN  Utsav Ghildiyal  Akash Negi 'Bunty'  Diksha Badoni  Ruchi Rawat.mp3|Saiyonee (Official Song)  Hiten  Ritika Raj  New Romantic Song 2026.mp3|Tin Chitthi Kile  Suresh Kala& Meena Rana  Latest Uttarakhandi Song  Garhwali Hit Song.mp3"
     ></audio>
 
-    <!--Start of Tawk.to Script-->
-    <script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    (function(){
-    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-    s1.async=true;
-    s1.src='https://embed.tawk.to/69cab02007aaa51c31a2a59e/1jkvrvvpt';
-    s1.charset='UTF-8';
-    s1.setAttribute('crossorigin','*');
-    s0.parentNode.insertBefore(s1,s0);
-    })();
-    </script>
-    <!--End of Tawk.to Script-->
+    <!-- Apple-style bottom music player -->
+    <div id="bottomPlayer" class="bottom-player">
+      <div class="player-container">
+        <div class="player-left">
+          <div class="player-cover">
+            <span class="player-cover-icon">♪</span>
+          </div>
+          <div class="player-info">
+            <div id="playerTitle" class="player-title">No track playing</div>
+            <div class="player-artist">Shalini — Meri Mohabbat</div>
+          </div>
+        </div>
+        <div class="player-controls">
+          <button id="prevBtn" class="player-btn">⏮</button>
+          <button id="playPauseBtn" class="player-btn player-btn-primary">▶</button>
+          <button id="nextBtn" class="player-btn">⏭</button>
+        </div>
+        <div class="player-volume">
+          <input id="volumeSlider" type="range" min="0" max="100" value="60" class="volume-slider">
+        </div>
+      </div>
+    </div>
 
     <script src="./script.js"></script>
   </body>
